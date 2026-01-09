@@ -13,8 +13,19 @@ View your app in AI Studio: https://ai.studio/apps/drive/1Q9iCq2DeRuaMVtyrgISENR
 **Prerequisites:**  Node.js
 
 
+
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key (create the file if it doesn't exist)
 3. Run the app:
    `npm run dev`
+
+## Deployment
+
+This project is configured to deploy to GitHub Pages automatically via GitHub Actions.
+
+1. Push your changes to the `main` branch.
+2. The "Deploy to GitHub Pages" action will trigger automatically.
+3. Once completed, your app will be live at `https://<username>.github.io/<repo-name>/`.
+
+Ensure execution permissions are enabled for GitHub Actions in your repository settings under **Settings > Actions > General**.
