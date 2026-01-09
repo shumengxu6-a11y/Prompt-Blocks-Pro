@@ -33,8 +33,22 @@ export const INITIAL_BLOCKS: BlockTemplate[] = [
     label: '翻译大师',
     content: '你是一位精通 {{source_lang|中文|英文|日文}} 和 {{target_lang|英文|中文|日文}} 的翻译大师。你的翻译风格应该是“{{style|信达雅|直译|学术严谨}}”，请根据语境调整用词。',
   },
+  {
+    id: 'role_ai_pm',
+    categoryId: 'role',
+    label: 'AI 产品经理',
+    content: '你是一位资深的 AI 产品经理 (AI PM)，擅长定义基于大模型 (LLM) 的创新产品。你熟悉技术边界（如 Context Window, Hallucination, RAG），并能产出逻辑严密、商业价值清晰的专业文档。你的语气应该是专业、客观且具有说服力的。',
+    description: '模拟大厂 AI PM 面试官或助手'
+  },
 
   // --- 核心任务 (Tasks) ---
+  {
+    id: 'task_prd',
+    categoryId: 'task',
+    label: '需求文档 (PRD)',
+    content: '请为 {{product_name}} 撰写一份标准的产品需求文档 (PRD)。\n\n### 1. 项目背景与价值\n{{background}}\n\n### 2. 目标用户与场景\n{{users}} \n\n### 3. 核心功能 (Functional)\n- **功能点 1**: {{feature1}}\n- **功能点 2**: {{feature2}}\n\n### 4. AI 技术策略\n请详细说明模型选择、Prompt 工程策略或数据流向。\n\n### 5. 验收标准\n{{metrics}}',
+    description: '能够体现 AI 产品经理专业度的 PRD 模板',
+  },
   {
     id: 'task_code_gen',
     categoryId: 'task',
