@@ -38,11 +38,11 @@ const useLocalStorage = <T,>(key: string, initialValue: T): [T, React.Dispatch<R
 
 const App: React.FC = () => {
   // State: Canvas Blocks
-  const [blocks, setBlocks] = useLocalStorage<BlockInstance[]>('prompt-blocks-v2', []);
-  
+  const [blocks, setBlocks] = useState<BlockInstance[]>([]);
+
   // State: History
   const [history, setHistory] = useLocalStorage<HistoryItem[]>('prompt-history', []);
-  
+
   // State: Custom User Templates
   const [customTemplates, setCustomTemplates] = useLocalStorage<BlockTemplate[]>('prompt-custom-templates', []);
 
@@ -55,7 +55,7 @@ const App: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<BlockTemplate | null>(null);
-  
+
   // Drag State for Visuals
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
@@ -65,7 +65,7 @@ const App: React.FC = () => {
   // Combine built-in and custom templates AND apply sort order
   const allTemplates = useMemo(() => {
     const combined = [...customTemplates, ...INITIAL_BLOCKS];
-    
+
     // If no custom sort order exists, return default
     if (librarySortOrder.length === 0) return combined;
 
@@ -73,28 +73,28 @@ const App: React.FC = () => {
     return combined.sort((a, b) => {
       const indexA = librarySortOrder.indexOf(a.id);
       const indexB = librarySortOrder.indexOf(b.id);
-      
+
       // If both items have a sort order, compare indices
       if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-      
+
       // If only one has a sort order, prioritize the one that does (or push new items to top/bottom)
       // Here we push unknown items to the end
       if (indexA !== -1) return -1;
       if (indexB !== -1) return 1;
-      
+
       return 0;
     });
   }, [customTemplates, librarySortOrder]);
 
   // Derived state: Final text
-  const finalPrompt = useMemo(() => 
-    generateFinalPrompt(blocks, allTemplates), 
+  const finalPrompt = useMemo(() =>
+    generateFinalPrompt(blocks, allTemplates),
     [blocks, allTemplates]
   );
 
   // Derived state: Stats
-  const stats = useMemo(() => 
-    calculateTokenStats(finalPrompt), 
+  const stats = useMemo(() =>
+    calculateTokenStats(finalPrompt),
     [finalPrompt]
   );
 
@@ -107,7 +107,7 @@ const App: React.FC = () => {
     };
     setBlocks((prev) => [...prev, newInstance]);
     setLastAddedId(newInstance.instanceId);
-    
+
     // Tiny haptic feedback vibe
     if (navigator.vibrate) navigator.vibrate(10);
   };
@@ -115,47 +115,47 @@ const App: React.FC = () => {
   // Reorder Library Items
   const handleReorderLibrary = (sourceId: string, targetId: string) => {
     setLibrarySortOrder((prevOrder) => {
-        // Ensure we have a complete list of IDs to start with if prevOrder is empty or partial
-        let currentOrder = prevOrder.length > 0 
-          ? [...prevOrder] 
-          : [...customTemplates, ...INITIAL_BLOCKS].map(b => b.id);
-        
-        // Ensure potentially missing IDs (newly created ones) are in the list before moving
-        const allIds = [...customTemplates, ...INITIAL_BLOCKS].map(b => b.id);
-        allIds.forEach(id => {
-            if (!currentOrder.includes(id)) currentOrder.push(id);
-        });
+      // Ensure we have a complete list of IDs to start with if prevOrder is empty or partial
+      let currentOrder = prevOrder.length > 0
+        ? [...prevOrder]
+        : [...customTemplates, ...INITIAL_BLOCKS].map(b => b.id);
 
-        const sourceIndex = currentOrder.indexOf(sourceId);
-        const targetIndex = currentOrder.indexOf(targetId);
+      // Ensure potentially missing IDs (newly created ones) are in the list before moving
+      const allIds = [...customTemplates, ...INITIAL_BLOCKS].map(b => b.id);
+      allIds.forEach(id => {
+        if (!currentOrder.includes(id)) currentOrder.push(id);
+      });
 
-        if (sourceIndex === -1 || targetIndex === -1) return prevOrder;
+      const sourceIndex = currentOrder.indexOf(sourceId);
+      const targetIndex = currentOrder.indexOf(targetId);
 
-        // Move item
-        currentOrder.splice(sourceIndex, 1);
-        currentOrder.splice(targetIndex, 0, sourceId);
+      if (sourceIndex === -1 || targetIndex === -1) return prevOrder;
 
-        return currentOrder;
+      // Move item
+      currentOrder.splice(sourceIndex, 1);
+      currentOrder.splice(targetIndex, 0, sourceId);
+
+      return currentOrder;
     });
   };
 
   // Move block up or down (Buttons)
   const handleMoveBlock = (instanceId: string, direction: 'up' | 'down') => {
     setBlocks(prev => {
-        const index = prev.findIndex(b => b.instanceId === instanceId);
-        if (index === -1) return prev;
-        
-        // Boundary checks
-        if (direction === 'up' && index === 0) return prev;
-        if (direction === 'down' && index === prev.length - 1) return prev;
+      const index = prev.findIndex(b => b.instanceId === instanceId);
+      if (index === -1) return prev;
 
-        const newBlocks = [...prev];
-        const swapIndex = direction === 'up' ? index - 1 : index + 1;
-        
-        // Swap
-        [newBlocks[index], newBlocks[swapIndex]] = [newBlocks[swapIndex], newBlocks[index]];
-        
-        return newBlocks;
+      // Boundary checks
+      if (direction === 'up' && index === 0) return prev;
+      if (direction === 'down' && index === prev.length - 1) return prev;
+
+      const newBlocks = [...prev];
+      const swapIndex = direction === 'up' ? index - 1 : index + 1;
+
+      // Swap
+      [newBlocks[index], newBlocks[swapIndex]] = [newBlocks[swapIndex], newBlocks[index]];
+
+      return newBlocks;
     });
   };
 
@@ -173,15 +173,15 @@ const App: React.FC = () => {
     setBlocks((prev) => {
       const newBlocks = [...prev];
       const draggedItemContent = newBlocks[dragItem.current!];
-      
+
       // Remove from old position
       newBlocks.splice(dragItem.current!, 1);
       // Insert at new position
       newBlocks.splice(index, 0, draggedItemContent);
-      
+
       return newBlocks;
     });
-    
+
     // Update ref to track new position
     dragItem.current = index;
   };
@@ -253,7 +253,7 @@ const App: React.FC = () => {
 
   // Update a specific slot value
   const handleUpdateValue = (instanceId: string, key: string, value: string) => {
-    setBlocks((prev) => 
+    setBlocks((prev) =>
       prev.map((b) => {
         if (b.instanceId === instanceId) {
           return { ...b, values: { ...b.values, [key]: value } };
@@ -269,7 +269,7 @@ const App: React.FC = () => {
 
     try {
       await navigator.clipboard.writeText(finalPrompt);
-      
+
       // Vibe: Confetti
       confetti({
         particleCount: 100,
@@ -287,7 +287,7 @@ const App: React.FC = () => {
         timestamp: Date.now(),
         blocksUsed: blocks.length
       };
-      
+
       // Keep last 20 items (LIFO logic in rendering, usually unshift for array)
       setHistory((prev) => [newHistoryItem, ...prev].slice(0, 20));
 
@@ -315,7 +315,7 @@ const App: React.FC = () => {
       timestamp: Date.now(),
       customTemplates,
       history,
-      librarySortOrder 
+      librarySortOrder
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -335,7 +335,7 @@ const App: React.FC = () => {
         try {
           const content = e.target?.result as string;
           const data = JSON.parse(content);
-          
+
           if (data.customTemplates && Array.isArray(data.customTemplates)) {
             // Merge custom templates (avoid duplicates by ID)
             setCustomTemplates(prev => {
@@ -344,16 +344,16 @@ const App: React.FC = () => {
               return [...newTemplates, ...prev];
             });
           }
-          
+
           if (data.history && Array.isArray(data.history)) {
-             setHistory(prev => {
-               // Simple merge, keeping most recent
-               return [...data.history, ...prev].slice(0, 50); 
-             });
+            setHistory(prev => {
+              // Simple merge, keeping most recent
+              return [...data.history, ...prev].slice(0, 50);
+            });
           }
 
           if (data.librarySortOrder && Array.isArray(data.librarySortOrder)) {
-             setLibrarySortOrder(data.librarySortOrder);
+            setLibrarySortOrder(data.librarySortOrder);
           }
 
           resolve();
@@ -378,11 +378,11 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen w-full bg-gray-950 text-gray-100 font-sans overflow-hidden">
-      
+
       {/* 1. Sidebar Library */}
-      <BlockLibrary 
-        blocks={allTemplates} 
-        onAddBlock={handleAddBlock} 
+      <BlockLibrary
+        blocks={allTemplates}
+        onAddBlock={handleAddBlock}
         onReorderBlock={handleReorderLibrary}
         onOpenCreateModal={handleOpenCreateModal}
         onEditBlock={handleEditBlock}
@@ -401,21 +401,21 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-             <button 
+            <button
               onClick={handleClearCanvas}
               className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/10 rounded-lg transition-colors"
               title="清空画布"
             >
               <Trash2 className="w-5 h-5" />
             </button>
-            <button 
+            <button
               onClick={() => setIsSettingsOpen(true)}
               className="p-2 text-gray-400 hover:text-indigo-400 hover:bg-gray-800 rounded-lg transition-colors"
               title="设置与数据"
             >
               <Settings className="w-5 h-5" />
             </button>
-            <button 
+            <button
               onClick={() => setShowHistory(!showHistory)}
               className={`p-2 rounded-lg transition-colors ${showHistory ? 'text-indigo-400 bg-indigo-900/20' : 'text-gray-400 hover:text-indigo-400 hover:bg-gray-800'}`}
               title="历史记录"
@@ -426,13 +426,13 @@ const App: React.FC = () => {
         </header>
 
         {/* Scrollable Canvas Area (Drop Zone) */}
-        <div 
+        <div
           className="flex-1 overflow-y-auto p-6 scroll-smooth"
           onDragOver={handleCanvasDragOver}
           onDrop={handleCanvasDrop}
         >
           <div className="max-w-4xl mx-auto min-h-[500px] pb-32">
-            
+
             {blocks.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-gray-600 space-y-4 border-2 border-dashed border-gray-800 rounded-2xl bg-gray-900/30 pointer-events-none">
                 <Wand2 className="w-12 h-12 mb-2 opacity-50" />
@@ -455,7 +455,7 @@ const App: React.FC = () => {
                       onUpdateValue={handleUpdateValue}
                       onRemove={handleRemoveBlock}
                       onMove={handleMoveBlock}
-                      
+
                       // Drag props
                       index={index}
                       onDragStart={handleDragStart}
@@ -471,14 +471,14 @@ const App: React.FC = () => {
                 })}
               </div>
             )}
-            
+
           </div>
         </div>
 
         {/* Bottom Status Bar & Action */}
         <div className="border-t border-gray-800 bg-gray-900/90 backdrop-blur p-4 shrink-0 absolute bottom-0 w-full z-20">
           <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            
+
             {/* Stats */}
             <div className="flex items-center gap-6 text-sm font-mono">
               <div className="flex flex-col">
@@ -524,33 +524,33 @@ const App: React.FC = () => {
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <HistoryChart history={history} />
-            
+
             <div className="space-y-3 mt-6">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">最近提示词</h3>
-                {history.map((item) => (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">最近提示词</h3>
+              {history.map((item) => (
                 <div key={item.id} className="bg-gray-800 rounded-lg p-3 border border-gray-700 hover:border-gray-500 transition-colors">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs text-gray-500 font-mono">
-                            {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                        <span className="text-xs bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded">
-                            {item.tokenCount} tok
-                        </span>
-                    </div>
-                    <p className="text-xs text-gray-300 line-clamp-3 mb-2 font-mono opacity-80">
-                        {item.content}
-                    </p>
-                    <button 
-                        onClick={() => handleRestoreHistory(item)}
-                        className="text-xs w-full py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-center transition-colors text-indigo-300"
-                    >
-                        复制文本
-                    </button>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs text-gray-500 font-mono">
+                      {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <span className="text-xs bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded">
+                      {item.tokenCount} tok
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-300 line-clamp-3 mb-2 font-mono opacity-80">
+                    {item.content}
+                  </p>
+                  <button
+                    onClick={() => handleRestoreHistory(item)}
+                    className="text-xs w-full py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-center transition-colors text-indigo-300"
+                  >
+                    复制文本
+                  </button>
                 </div>
-                ))}
-                {history.length === 0 && (
-                    <p className="text-center text-gray-600 text-sm py-4">暂无记录。</p>
-                )}
+              ))}
+              {history.length === 0 && (
+                <p className="text-center text-gray-600 text-sm py-4">暂无记录。</p>
+              )}
             </div>
           </div>
         </div>
@@ -558,13 +558,13 @@ const App: React.FC = () => {
 
       {/* 4. Custom Block Modal (Create or Edit) */}
       {isCreateModalOpen && (
-        <CreateBlockModal 
+        <CreateBlockModal
           initialData={editingTemplate}
           onClose={() => {
             setIsCreateModalOpen(false);
             setEditingTemplate(null);
-          }} 
-          onSave={handleSaveCustomTemplate} 
+          }}
+          onSave={handleSaveCustomTemplate}
         />
       )}
 
