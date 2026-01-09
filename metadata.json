@@ -1,0 +1,5 @@
+{
+  "name": "Prompt Blocks Pro",
+  "description": "模块化提示词工程工具，支持智能槽位、Token 预估和本地历史管理。",
+  "requestFramePermissions": []
+}
